@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ZineMode</title>
+<meta name="description" content="Read web articles in paged, magazine-style columns. A bookmarklet and userscript for Safari on iPad and Mac, and other browsers.">
+<meta property="og:title" content="ZineMode">
+<meta property="og:description" content="Read web articles in paged, magazine-style columns.">
+<meta property="og:image" content="https://zinemode.github.io/{{BASE}}preview.jpg">
+<style>
+:root{--bg:#fbf8f2;--fg:#1d1b18;--mute:#6f6962;--rule:#e2dccf;--card:#fffdf8;--accent:#a8322d;--accent-fg:#fff;--code:#f1ece2}
+@media (prefers-color-scheme:dark){:root{--bg:#161514;--fg:#ece7dd;--mute:#a09a90;--rule:#34312d;--card:#1e1d1b;--accent:#e2766f;--accent-fg:#161514;--code:#2a2826}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:18px/1.55 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
+.wrap{max-width:68rem;margin:0 auto;padding:0 max(16px,4vw)}
+.sans{font-family:-apple-system,system-ui,"Segoe UI",sans-serif}
+header{padding:3.5rem 0 2rem;border-bottom:2px solid var(--fg)}
+.kicker{font:600 .75rem/1 -apple-system,system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin:0 0 1rem}
+h1{font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.02;margin:0 0 .8rem;letter-spacing:-.015em}
+.dek{font-size:clamp(1.1rem,2.2vw,1.35rem);font-style:italic;color:var(--mute);margin:0;max-width:40rem}
+.meta{font:500 .8rem/1.4 -apple-system,system-ui,sans-serif;color:var(--mute);margin-top:1.2rem}
+.meta a{color:inherit}
+figure{margin:2.2rem 0 0}
+figure img{display:block;width:100%;height:auto;border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.14),0 0 0 1px var(--rule)}
+figcaption{font:.8rem/1.4 -apple-system,system-ui,sans-serif;color:var(--mute);margin-top:.6rem}
+h2{font:700 1.45rem/1.2 -apple-system,system-ui,sans-serif;margin:0 0 .4rem}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr));gap:1.5rem;margin:2.5rem 0}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:1.5rem 1.5rem 1.2rem}
+.tag{display:inline-block;font:600 .7rem/1 -apple-system,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.7rem}
+.card p{margin:.3rem 0 .8rem}
+ol{padding-left:1.3rem;margin:.6rem 0}
+li{margin:.45rem 0}
+.btns{display:flex;flex-wrap:wrap;gap:.6rem;margin:1rem 0 .4rem}
+.btn{display:inline-flex;align-items:center;gap:.5rem;font:600 .95rem/1 -apple-system,system-ui,sans-serif;padding:.8rem 1.1rem;border-radius:11px;text-decoration:none;cursor:pointer;border:0}
+.btn.primary{background:var(--accent);color:var(--accent-fg)}
+.btn.ghost{background:transparent;color:var(--fg);box-shadow:inset 0 0 0 1.5px var(--rule)}
+.btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.small{font:.82rem/1.45 -apple-system,system-ui,sans-serif;color:var(--mute)}
+code,kbd{font:.85em ui-monospace,Menlo,monospace;background:var(--code);padding:.08em .35em;border-radius:5px;overflow-wrap:anywhere}
+details{margin-top:.8rem}
+summary{cursor:pointer;font:600 .9rem/1.4 -apple-system,system-ui,sans-serif}
+section.use{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:1.2rem 2rem;padding:2rem 0;border-top:1px solid var(--rule)}
+section.use h3{font:600 1rem/1.3 -apple-system,system-ui,sans-serif;margin:0 0 .3rem}
+section.use p{margin:0;font-size:.98rem}
+footer{border-top:2px solid var(--fg);padding:1.4rem 0 3rem;margin-top:1rem}
+footer p{margin:.3rem 0}
+a{color:var(--accent)}
+.banner{font:600 .85rem/1.4 -apple-system,system-ui,sans-serif;background:var(--accent);color:var(--accent-fg);padding:.6rem .9rem;border-radius:10px;margin:1rem 0 0;max-width:40rem}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#46464a;color:#fff;padding:.7rem 1rem;border-radius:12px;font:500 .9rem/1.2 -apple-system,system-ui,sans-serif;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="kicker">ZineMode</p>
+    <h1>Read any article like a magazine.</h1>
+    <p class="dek">ZineMode turns the web page you’re reading into paged, multi-column spreads, with a proper headline, drop cap and justified text. Built for Safari on iPad and Mac. No app required.</p>
+    {{BANNER}}<p class="meta">Version {{VERSION}} · <a href="{{NOTES_URL}}">What’s new</a> · <a href="https://github.com/zinemode/ZineMode">Source on GitHub</a></p>
+    <figure>
+      <picture>
+        <source srcset="{{BASE}}preview-dark.jpg" media="(prefers-color-scheme: dark)">
+        <img src="{{BASE}}preview.jpg" width="2360" height="1640" alt="An article shown by ZineMode: headline across the top, three justified columns of text with a red drop cap.">
+      </picture>
+      <figcaption>An article in ZineMode on an iPad in landscape: three columns, one page at a time.</figcaption>
+    </figure>
+  </header>
+
+  <div class="cols">
+    <div class="card">
+      <span class="tag">Recommended for Safari</span>
+      <h2>Userscript</h2>
+      <p>Adds a small ZineMode button to article pages. Updates itself, and works on sites that block bookmarklets.</p>
+      <ol>
+        <li>Install the free <a href="https://github.com/quoid/userscripts">Userscripts</a> app on your iPad or Mac, turn on its Safari extension and allow it on all websites.</li>
+        <li>Open the link below in Safari, then tap the Userscripts icon and install ZineMode. Or, in Userscripts, choose <b>New Remote</b> and paste this address: <code>{{USERSCRIPT_URL}}</code></li>
+      </ol>
+      <div class="btns">
+        <a class="btn primary" href="{{USERSCRIPT_URL}}"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>ZineMode.user.js</a>
+      </div>
+      <p class="small">Keeping scripts in iCloud Drive? Userscripts can only read files that are downloaded, so long-press the folder in Files and choose <b>Keep Downloaded</b>.</p>
+    </div>
+
+    <div class="card">
+      <span class="tag">Nothing to install</span>
+      <h2>Bookmarklet</h2>
+      <p>A bookmark that turns on ZineMode. Works in any browser, and syncs to your iPad through iCloud.</p>
+      <div class="btns">
+        <a class="btn primary" id="bm" href="{{BOOKMARKLET_HREF}}" title="Drag me to your Favorites bar"><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="2.2"/><path d="M8.5 8h2.5M8.5 11h2.5M8.5 14h2.5M13 8h2.5M13 11h2.5M13 14h1.5"/></svg>ZineMode</a>
+        <button class="btn ghost" id="copy" type="button"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>Copy code</button>
+      </div>
+      <p><b>Mac:</b> show the Favorites bar (<kbd>⇧⌘B</kbd>) and drag the red button onto it.</p>
+      <details>
+        <summary>iPad and iPhone</summary>
+        <ol>
+          <li>Tap <b>Copy code</b>.</li>
+          <li>Bookmark this page: Share → <b>Add Bookmark</b>, save it in <b>Favorites</b>.</li>
+          <li>Open your bookmarks, tap <b>Edit</b>, tap the new bookmark, rename it <b>ZineMode</b>, and replace its address with the copied code.</li>
+          <li>For one-tap access, turn on Settings → Apps → Safari → <b>Show Favorites Bar</b>.</li>
+        </ol>
+        <p class="small">If ZineMode is already in your Mac’s Favorites with iCloud bookmarks on, it’s already on your iPad.</p>
+      </details>
+      <p class="small">About {{BOOKMARKLET_KB}} KB. Once a day it checks this site for a newer version and lets you know.</p>
+    </div>
+  </div>
+
+  <section class="use">
+    <div><h3>Turn pages</h3><p>Swipe, tap the left or right third of the screen, or use the arrow keys and space bar.</p></div>
+    <div><h3>Adjust</h3><p>The faint ☰ at the top right has text size and light, sepia and dark themes.</p></div>
+    <div><h3>Leave</h3><p>Exit full screen (Safari’s ✕ or <kbd>Esc</kbd>) and the original page is back, right where you were.</p></div>
+    <div><h3>Pick up where you left off</h3><p>ZineMode remembers your page. Open it on the same article again to resume.</p></div>
+    <div><h3>Keyboard</h3><p>With the userscript, <kbd>⌥⇧Z</kbd> opens ZineMode on any page. <kbd>F</kbd> toggles full screen.</p></div>
+    <div><h3>Private</h3><p>Everything happens in your browser. No accounts, no tracking. The only request ZineMode makes is the daily version check.</p></div>
+  </section>
+
+  <footer class="small">
+    <p>ZineMode {{VERSION}} · <a href="https://github.com/zinemode/ZineMode">GitHub</a> · <a href="https://github.com/zinemode/ZineMode/issues">Report a site that doesn’t work</a>{{OTHER_CHANNEL}}</p>
+    <p>Article extraction by <a href="https://github.com/mozilla/readability">Mozilla Readability</a>, Apache License 2.0.</p>
+  </footer>
+</div>
+<div class="toast" id="toast">Copied. Now paste it as a bookmark’s address.</div>
+<script>
+  const bm = document.getElementById("bm");
+  bm.addEventListener("click", e => { e.preventDefault(); show("Drag this button to your Favorites bar, or use Copy code."); });
+  document.getElementById("copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(bm.getAttribute("href")); show("Copied. Now paste it as a bookmark’s address."); }
+    catch (e) { show("Couldn’t copy. Long-press the red button and choose Copy Link."); }
+  });
+  let t; function show(msg) { const el = document.getElementById("toast"); el.textContent = msg; el.classList.add("on"); clearTimeout(t); t = setTimeout(() => el.classList.remove("on"), 3200); }
+</script>
+</body>
+</html>
